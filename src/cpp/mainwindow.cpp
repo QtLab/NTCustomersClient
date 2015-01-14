@@ -25,7 +25,7 @@ QTextStream cout(stdout);
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 {
 	setWindowTitle("Northwind Customers Form");
-	resize(695,500);
+	setFixedSize(695,500);
 	northwind = initdb();
 	initUI();
 }
@@ -62,6 +62,8 @@ void MainWindow::initUI()
 	connect(buttons[clr],SIGNAL(clicked()),this,SLOT(clear_edits()));
 	connect(buttons[upd],SIGNAL(clicked()),this,SLOT(update_db()));
 	connect(buttons[nu],SIGNAL(clicked()),this,SLOT(add_db()));
+	connect(buttons[del],SIGNAL(clicked()),this,SLOT(del_db()));
+
 	
 	// QTableView that displays the Customers Table from Northwind
 	tableDisplay = new QTableView(this);
@@ -118,6 +120,13 @@ void MainWindow::initUI()
 	orderButton[gtconname]->setText("> Contact Name");
 	orderButton[ltconname]->setObjectName("orderButton[ltconname]");
 	orderButton[ltconname]->setText("< Contact Name");
+	
+	connect(orderButton[gtcustID],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
+	connect(orderButton[ltcustID],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
+	connect(orderButton[gtcompname],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
+	connect(orderButton[ltcompname],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
+	connect(orderButton[gtconname],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
+	connect(orderButton[ltconname],SIGNAL(toggled(bool)),this,SLOT(set_sort()));
 
 	customerOrder->addWidget(orderButton[gtcustID]);
 	customerOrder->addWidget(orderButton[ltcustID]);
@@ -254,6 +263,7 @@ void MainWindow::initUI()
 
 void MainWindow::clear_edits()
 {
+	cout << "\t>>SLOT: clear_edits"<<endl;
 	foreach(QLineEdit* le, findChildren<QLineEdit*>()) {
 		le->clear();
 	}	
@@ -261,7 +271,7 @@ void MainWindow::clear_edits()
 
 void MainWindow::map_edits(const QModelIndex& index)
 {
-	cout << "\t>>DEBUG: map_edits"<<endl;
+	cout << "\t>>SLOT: map_edits"<<endl;
 	QDataWidgetMapper* mapper = new QDataWidgetMapper(this);	
 	mapper->setModel(this->tableDisplay->model());
 
@@ -282,6 +292,9 @@ void MainWindow::map_edits(const QModelIndex& index)
 // update database
 void MainWindow::update_db()
 {
+	QModelIndex index(tableDisplay->currentIndex());
+	
+	cout << "\t>>SLOT: update_db"<<endl;
 	cout  << ( northwind.open() ? "connected...": "not connected") << endl;
 	cout << custIDEdit->text() <<endl;
 	QSqlQuery query;
@@ -309,12 +322,14 @@ void MainWindow::update_db()
 	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
 	proxyCustomersModel->setSourceModel(customersModel);
 	tableDisplay->setModel(proxyCustomersModel);
+	tableDisplay->scrollTo(index,QAbstractItemView::EnsureVisible);
 	
 }
 
 // add to database
 void MainWindow::add_db()
 {
+	cout << "\t>>SLOT:add_db" << endl;
 	cout  << ( northwind.open() ? "connected...": "not connected") << endl;
 	QSqlQuery query;
 	query.exec(
@@ -341,4 +356,51 @@ void MainWindow::add_db()
 	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
 	proxyCustomersModel->setSourceModel(customersModel);
 	tableDisplay->setModel(proxyCustomersModel);
+}
+
+void MainWindow::del_db()
+{
+	cout << "\t>>SLOT:del_db" <<endl;
+	cout  << ( northwind.open() ? "connected...": "not connected") << endl;
+	QSqlQuery query;
+	query.exec(
+		QString("CALL delete_from_customers(\'%1\',\'%2\',\'%3\',\'%4\',\'%5\',\'%6\',\'%7\',\'%8\',\'%9\',\'%10\',\'%11\')")	
+			.arg(custIDEdit->text())
+			.arg(compNameEdit->text())
+			.arg(conNameEdit->text())
+			.arg(conTitleEdit->text())
+			.arg(addressEdit->text())
+			.arg(cityEdit->text())
+			.arg(regionEdit->text())
+			.arg(postCodeEdit->text())
+			.arg(countryEdit->text())
+			.arg(phoneEdit->text())
+			.arg(faxEdit->text())
+			);
+
+	cout << query.lastQuery() <<endl;
+	northwind.close();
+	cout << "connection closed..." << endl;
+	cout << "Update tableDisplay" <<endl;
+	QSqlQueryModel* customersModel = get_table(&northwind);
+	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
+	proxyCustomersModel->setSourceModel(customersModel);
+	tableDisplay->setModel(proxyCustomersModel);
+}
+
+void MainWindow::set_sort()
+{
+	if (orderButton[gtcustID]->isChecked())
+		tableDisplay->model()->sort(0);
+	if (orderButton[ltcustID]->isChecked())
+		tableDisplay->model()->sort(0,Qt::DescendingOrder);
+	if (orderButton[gtcompname]->isChecked())
+		tableDisplay->model()->sort(1);
+	if (orderButton[ltcompname]->isChecked())
+		tableDisplay->model()->sort(1,Qt::DescendingOrder);
+	if (orderButton[gtconname]->isChecked())
+		tableDisplay->model()->sort(2);
+	if (orderButton[ltconname]->isChecked())
+		tableDisplay->model()->sort(2,Qt::DescendingOrder);
+
 }

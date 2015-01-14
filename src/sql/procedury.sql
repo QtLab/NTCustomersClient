@@ -85,9 +85,22 @@ DROP PROCEDURE IF EXISTS northwind.`delete_from_customers`;
 
 DELIMITER $$
 
-CREATE PROCEDURE northwind.`delete_from_customers`()
+CREATE PROCEDURE northwind.`delete_from_customers`(
+	IN AtCustomerID VARCHAR(5),
+	IN AtCompanyName VARCHAR(40),
+	IN AtContactName VARCHAR(30),
+	IN AtContactTitle VARCHAR(30),
+	IN AtAdress VARCHAR(60),
+	IN AtCity VARCHAR(15),
+	IN AtRegion VARCHAR(15),
+	IN AtPostalCode VARCHAR(10),
+	IN AtCountry VARCHAR(15),
+	IN AtPhone VARCHAR(24),
+	IN AtFax VARCHAR(24)
+)
 BEGIN
-
+	DELETE FROM Customers
+	WHERE CustomerID = AtCustomerID;
 END$$
 
 DELIMITER ;

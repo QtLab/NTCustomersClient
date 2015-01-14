@@ -31,6 +31,8 @@ class MainWindow : public QWidget {
 		void map_edits(const QModelIndex&);
 		void update_db();
 		void add_db();
+		void del_db();
+		void set_sort();
 
 	private:
 		void initUI();
@@ -77,7 +79,5 @@ class MainWindow : public QWidget {
 		QLabel* labels[labelNum];
 
 		QSqlDatabase northwind;
-
-
 };
 #endif //JO_MAINWINDOW_HPP
