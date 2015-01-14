@@ -1,0 +1,8 @@
+*.swp
+*.o
+Makefile
+*.pro
+moc_*
+./tmp/
+./screenshots/
+./src/bin/
