@@ -3,7 +3,7 @@
 Makefile
 
 moc_*
-./tmp/
+./ui/
 ./screenshots/
 ./src/bin/
 ./src/cpp/cpp
