@@ -6,4 +6,5 @@ moc_*
 ./tmp/
 ./screenshots/
 ./src/bin/
+./src/cpp/cpp
 
