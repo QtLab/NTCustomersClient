@@ -3,8 +3,8 @@
 Makefile
 
 moc_*
-./ui/
+ui/
 ./screenshots/
 ./src/bin/
-./src/cpp/cpp
+src/cpp/cpp
 
