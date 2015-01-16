@@ -71,7 +71,7 @@ void MainWindow::initUI()
 	tableDisplay->setGeometry(QRect(10, 10, 561, 211));
 	tableDisplay->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableDisplay->setSelectionMode(QAbstractItemView::SingleSelection);
-	tableDisplay->setSortingEnabled(true);
+	//tableDisplay->setSortingEnabled(true);
 
 
 	// connect to db to get the display
@@ -110,6 +110,7 @@ void MainWindow::initUI()
 
 	orderButton[gtcustID]->setObjectName("orderButton[gtcustID]");
 	orderButton[gtcustID]->setText("> CustomerID");
+	orderButton[gtcustID]->setChecked(true);
 	orderButton[ltcustID]->setObjectName("orderButton[ltcustID]");
 	orderButton[ltcustID]->setText("< CustomerID");
 	orderButton[gtcompname]->setObjectName("orderButton[gtcompname]");
@@ -390,17 +391,28 @@ void MainWindow::del_db()
 
 void MainWindow::set_sort()
 {
-	if (orderButton[gtcustID]->isChecked())
+	if (orderButton[gtcustID]->isChecked()){
 		tableDisplay->model()->sort(0);
-	if (orderButton[ltcustID]->isChecked())
+		tableDisplay->sortByColumn(0,Qt::AscendingOrder);
+	}
+	if (orderButton[ltcustID]->isChecked()){
 		tableDisplay->model()->sort(0,Qt::DescendingOrder);
-	if (orderButton[gtcompname]->isChecked())
+		tableDisplay->sortByColumn(0, Qt::DescendingOrder);
+	}
+	if (orderButton[gtcompname]->isChecked()){
 		tableDisplay->model()->sort(1);
-	if (orderButton[ltcompname]->isChecked())
+		tableDisplay->sortByColumn(1,Qt::AscendingOrder);
+	}
+	if (orderButton[ltcompname]->isChecked()){
 		tableDisplay->model()->sort(1,Qt::DescendingOrder);
-	if (orderButton[gtconname]->isChecked())
+		tableDisplay->sortByColumn(1, Qt::DescendingOrder);
+	}
+	if (orderButton[gtconname]->isChecked()){
 		tableDisplay->model()->sort(2);
-	if (orderButton[ltconname]->isChecked())
+		tableDisplay->sortByColumn(2,Qt::AscendingOrder);
+	}
+	if (orderButton[ltconname]->isChecked()){
 		tableDisplay->model()->sort(2,Qt::DescendingOrder);
-
+		tableDisplay->sortByColumn(2, Qt::DescendingOrder);
+	}
 }
