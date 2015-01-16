@@ -1,5 +1,5 @@
-/* name : Source
- * date:  
+/* name : initdb.cpp
+ * date: 2015-01-11 
  * author: Jakub Olczyk (jakub.olczyk@openmailbox.com)
  * license : Beerware license similar to the one below. But the beer goes to me ;) 
  *
@@ -12,21 +12,25 @@
  */
 
 #include "initdb.hpp"
+#include <QInputDialog>
+#include <QMessageBox>
 
 QSqlDatabase initdb()
 {
 	QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");	
 	db.setHostName("localhost");
 	db.setDatabaseName("northwind");
-	db.setUserName("jakub");
-	db.setPassword("");
+	db.setUserName(QInputDialog::getText(0,"DB User","DB username:"));
+	db.setPassword(QInputDialog::getText(0,"DB User","DB password:"));
 
 	return db;
 }
 
 QSqlQueryModel* get_table(QSqlDatabase* db)
 {
-	db->open();
+	if (!db->open()){
+		QMessageBox::warning(0,"DB error","There is a problem with connection to DB server");
+	}
 	QSqlQueryModel* mod = new QSqlQueryModel();
 	mod->setQuery("SELECT * FROM northwind.Customers");
 	db->close();
