@@ -29,7 +29,7 @@ QSqlDatabase initdb()
 QSqlQueryModel* get_table(QSqlDatabase* db)
 {
 	if (!db->open()){
-		QMessageBox::warning(0,"DB error","There is a problem with connection to DB server");
+		QMessageBox::warning(0,"DB error","connection problem!");
 	}
 	QSqlQueryModel* mod = new QSqlQueryModel();
 	mod->setQuery("SELECT * FROM northwind.Customers");

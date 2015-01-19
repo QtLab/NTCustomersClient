@@ -20,6 +20,7 @@ QTextStream cout(stdout);
 #include <QDataWidgetMapper>
 #include <QSortFilterProxyModel>
 #include <QSqlQuery>
+#include <QSqlError>
 
 //constructor 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
@@ -110,7 +111,7 @@ void MainWindow::initUI()
 
 	orderButton[gtcustID]->setObjectName("orderButton[gtcustID]");
 	orderButton[gtcustID]->setText("> CustomerID");
-	orderButton[gtcustID]->setChecked(true);
+	orderButton[gtcustID]->setChecked(true); //default order in tableDisplay
 	orderButton[ltcustID]->setObjectName("orderButton[ltcustID]");
 	orderButton[ltcustID]->setText("< CustomerID");
 	orderButton[gtcompname]->setObjectName("orderButton[gtcompname]");
@@ -315,6 +316,8 @@ void MainWindow::update_db()
 			);
 
 	cout << query.lastQuery()<<endl;
+	query.next();
+
 	northwind.close();
 	cout << "connection closed..." << endl;
 	
@@ -349,6 +352,7 @@ void MainWindow::add_db()
 			);
 
 		cout << query.lastQuery() <<endl;
+	query.next();
 	northwind.close();
 	cout << "connection closed..." << endl;
 
@@ -380,6 +384,7 @@ void MainWindow::del_db()
 			);
 
 	cout << query.lastQuery() <<endl;
+	query.next();
 	northwind.close();
 	cout << "connection closed..." << endl;
 	cout << "Update tableDisplay" <<endl;
