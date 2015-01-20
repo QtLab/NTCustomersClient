@@ -66,7 +66,6 @@ void MainWindow::initUI()
 	connect(buttons[nu],SIGNAL(clicked()),this,SLOT(add_db()));
 	connect(buttons[del],SIGNAL(clicked()),this,SLOT(del_db()));
 
-	
 	// QTableView that displays the Customers Table from Northwind
 	tableDisplay = new QTableView(this);
 	tableDisplay->setObjectName("tableDisplay");
@@ -76,10 +75,6 @@ void MainWindow::initUI()
 	tableDisplay->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
 	tableDisplay->setEditTriggers(QAbstractItemView::SelectedClicked);
 	tableDisplay->horizontalHeader()->setHighlightSections(false);
-	
-
-
-
 
 	// connect to db to get the display
 	QSqlQueryModel* customersModel = get_table(&northwind);
@@ -307,8 +302,6 @@ void MainWindow::map_edits(const QModelIndex& index)
 // update database
 void MainWindow::update_db()
 {
-	QModelIndex index(tableDisplay->currentIndex());
-	
 	cout << "\t>>SLOT: update_db"<<endl;
 	cout  << ( northwind.open() ? "connected...": "not connected") << endl;
 	cout << custIDEdit->text() <<endl;
@@ -342,7 +335,7 @@ void MainWindow::update_db()
 void MainWindow::add_db()
 {
 	cout << "\t>>SLOT:add_db" << endl;
-	cout  << ( northwind.open() ? "connected...": "not connected") << endl;
+	cout  << ( northwind.open() ? "\tconnected...": "\tnot connected") << endl;
 	QSqlQuery query;
 	query.exec(
 		QString("CALL add_to_customers(\'%1\',\'%2\',\'%3\',\'%4\',\'%5\',\'%6\',\'%7\',\'%8\',\'%9\',\'%10\',\'%11\')")	
@@ -420,7 +413,7 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 		QMessageBox::warning(0,"DB error","connection problem!");
 	}
 	cout <<"\t:connected..." << endl;
-	QSqlQueryModel* mod = new QSqlQueryModel();
+	QSqlQueryModel* mod = (QSqlQueryModel*)tableDisplay->model();
 	mod->setQuery(QString("SELECT * FROM northwind.Customers ORDER BY %1 %2")
 					.arg((column == 0)?
 							"CustomerID":
@@ -432,7 +425,6 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 	this->northwind.close();
 	cout << "\t:connection closed..." << endl;
 	this->tableDisplay->setModel(mod);
-	this->tableDisplay->setSelectionModel(new QItemSelectionModel(mod));
 	this->tableDisplay->keyboardSearch(this->custIDEdit->text());
 	cout <<  "\t\t>>DEBUG:keyboardSearch " << this->custIDEdit->text()<< endl;
 	this->tableDisplay->keyboardSearch(this->compNameEdit->text());
