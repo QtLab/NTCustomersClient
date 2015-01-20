@@ -75,6 +75,7 @@ void MainWindow::initUI()
 	tableDisplay->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
 	tableDisplay->setEditTriggers(QAbstractItemView::SelectedClicked);
 	tableDisplay->horizontalHeader()->setHighlightSections(false);
+	tableDisplay->setAlternatingRowColors(true);
 
 	// connect to db to get the display
 	QSqlQueryModel* customersModel = get_table(&northwind);
@@ -425,6 +426,7 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 	this->northwind.close();
 	cout << "\t:connection closed..." << endl;
 	this->tableDisplay->setModel(mod);
+	cout << "SELECTIONMODEL changes"<<endl;
 	this->tableDisplay->keyboardSearch(this->custIDEdit->text());
 	cout <<  "\t\t>>DEBUG:keyboardSearch " << this->custIDEdit->text()<< endl;
 	this->tableDisplay->keyboardSearch(this->compNameEdit->text());
@@ -440,12 +442,15 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 }
 
 void MainWindow::slot_SelectionChanged(const QItemSelection &, const QItemSelection &)
-    {
-      QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
-      for (int i = 0; i < indexes.count(); ++i)
-      {
-        // Output the rows of all of the selected indexes
-        cout << "selectedIndexes: " << indexes.at(i).row() << endl;
-      }
-    }
-
+{
+      //QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
+      //for (int i = 0; i < indexes.count(); ++i)
+      //{
+        //// Output the rows of all of the selected indexes
+        //cout << "selectedIndexes: " << indexes.at(i).row() << endl;
+      //}
+	cout << "\t>>SLOT:slot_SelectionChanged"<<endl;	
+	tableDisplay->selectionModel()->select(
+					tableDisplay->selectionModel()->selection(), 
+					QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+}
