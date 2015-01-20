@@ -21,7 +21,8 @@ QTextStream cout(stdout);
 #include <QSortFilterProxyModel>
 #include <QSqlQuery>
 #include <QSqlError>
-
+#include <QHeaderView>
+#include <QItemSelectionModel>
 //constructor 
 MainWindow::MainWindow(QWidget* parent) : QWidget(parent)
 {
@@ -72,14 +73,26 @@ void MainWindow::initUI()
 	tableDisplay->setGeometry(QRect(10, 10, 561, 211));
 	tableDisplay->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableDisplay->setSelectionMode(QAbstractItemView::SingleSelection);
-	//tableDisplay->setSortingEnabled(true);
+	tableDisplay->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
+	tableDisplay->setEditTriggers(QAbstractItemView::SelectedClicked);
+	tableDisplay->horizontalHeader()->setHighlightSections(false);
+	
+
+
 
 
 	// connect to db to get the display
 	QSqlQueryModel* customersModel = get_table(&northwind);
-	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
-	proxyCustomersModel->setSourceModel(customersModel);
-	tableDisplay->setModel(proxyCustomersModel);
+	tableDisplay->setModel(customersModel);
+	tableDisplay->setSelectionModel(new QItemSelectionModel(customersModel));
+
+	// handling the changes in selectionModel
+    connect(tableDisplay->selectionModel(),
+		   	SIGNAL(selectionChanged(const QItemSelection &, 
+					const QItemSelection &)),
+		   	this,
+		   	SLOT(slot_SelectionChanged(const QItemSelection &,
+				   	const QItemSelection &)));
 
 	//connect showRow() with QLineEdits
 	connect(tableDisplay,SIGNAL(activated(QModelIndex)),this,SLOT(map_edits(QModelIndex)));
@@ -319,15 +332,10 @@ void MainWindow::update_db()
 	query.next();
 
 	northwind.close();
-	cout << "connection closed..." << endl;
+	cout << "\tconnection closed..." << endl;
 	
 	cout << "Update tableDisplay" <<endl;
-	QSqlQueryModel* customersModel = get_table(&northwind);
-	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
-	proxyCustomersModel->setSourceModel(customersModel);
-	tableDisplay->setModel(proxyCustomersModel);
-	tableDisplay->scrollTo(index,QAbstractItemView::EnsureVisible);
-	
+	set_sort();	
 }
 
 // add to database
@@ -354,13 +362,10 @@ void MainWindow::add_db()
 		cout << query.lastQuery() <<endl;
 	query.next();
 	northwind.close();
-	cout << "connection closed..." << endl;
+	cout << "\tconnection closed..." << endl;
 
 	cout << "Update tableDisplay" <<endl;
-	QSqlQueryModel* customersModel = get_table(&northwind);
-	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
-	proxyCustomersModel->setSourceModel(customersModel);
-	tableDisplay->setModel(proxyCustomersModel);
+	set_sort();
 }
 
 void MainWindow::del_db()
@@ -386,38 +391,69 @@ void MainWindow::del_db()
 	cout << query.lastQuery() <<endl;
 	query.next();
 	northwind.close();
-	cout << "connection closed..." << endl;
+	cout << "\tconnection closed..." << endl;
 	cout << "Update tableDisplay" <<endl;
-	QSqlQueryModel* customersModel = get_table(&northwind);
-	QSortFilterProxyModel* proxyCustomersModel = new QSortFilterProxyModel(this);
-	proxyCustomersModel->setSourceModel(customersModel);
-	tableDisplay->setModel(proxyCustomersModel);
+	set_sort(); // updating the tableDisplay with new data from db
 }
 
 void MainWindow::set_sort()
 {
 	if (orderButton[gtcustID]->isChecked()){
-		tableDisplay->model()->sort(0);
-		tableDisplay->sortByColumn(0,Qt::AscendingOrder);
-	}
-	if (orderButton[ltcustID]->isChecked()){
-		tableDisplay->model()->sort(0,Qt::DescendingOrder);
-		tableDisplay->sortByColumn(0, Qt::DescendingOrder);
-	}
-	if (orderButton[gtcompname]->isChecked()){
-		tableDisplay->model()->sort(1);
-		tableDisplay->sortByColumn(1,Qt::AscendingOrder);
-	}
-	if (orderButton[ltcompname]->isChecked()){
-		tableDisplay->model()->sort(1,Qt::DescendingOrder);
-		tableDisplay->sortByColumn(1, Qt::DescendingOrder);
-	}
-	if (orderButton[gtconname]->isChecked()){
-		tableDisplay->model()->sort(2);
-		tableDisplay->sortByColumn(2,Qt::AscendingOrder);
-	}
-	if (orderButton[ltconname]->isChecked()){
-		tableDisplay->model()->sort(2,Qt::DescendingOrder);
-		tableDisplay->sortByColumn(2, Qt::DescendingOrder);
+		get_sorted(0,Qt::AscendingOrder);
+	}else if (orderButton[ltcustID]->isChecked()){
+		get_sorted(0, Qt::DescendingOrder);
+	}else if (orderButton[gtcompname]->isChecked()){
+		get_sorted(1,Qt::AscendingOrder);
+	}else if (orderButton[ltcompname]->isChecked()){
+		get_sorted(1, Qt::DescendingOrder);
+	}else if (orderButton[gtconname]->isChecked()){
+		get_sorted(2,Qt::AscendingOrder);
+	}else if (orderButton[ltconname]->isChecked()){
+		get_sorted(2,Qt::DescendingOrder);
 	}
 }
+
+void MainWindow::get_sorted(int column, Qt::SortOrder order)
+{
+	cout << "\t>>FUNC: get_sorted" << endl;
+	if (!this->northwind.open()){
+		QMessageBox::warning(0,"DB error","connection problem!");
+	}
+	cout <<"\t:connected..." << endl;
+	QSqlQueryModel* mod = new QSqlQueryModel();
+	mod->setQuery(QString("SELECT * FROM northwind.Customers ORDER BY %1 %2")
+					.arg((column == 0)?
+							"CustomerID":
+							(column == 1)?
+								"CompanyName":"ContactName")
+					.arg((order == Qt::AscendingOrder)? "ASC":"DESC")
+			);
+	cout << "\t:data from db collected" << endl;
+	this->northwind.close();
+	cout << "\t:connection closed..." << endl;
+	this->tableDisplay->setModel(mod);
+	this->tableDisplay->setSelectionModel(new QItemSelectionModel(mod));
+	this->tableDisplay->keyboardSearch(this->custIDEdit->text());
+	cout <<  "\t\t>>DEBUG:keyboardSearch " << this->custIDEdit->text()<< endl;
+	this->tableDisplay->keyboardSearch(this->compNameEdit->text());
+	cout << "\t\t>>DEBUG:keyboardSearch " << this->compNameEdit->text() << endl;
+	cout << "tableDisplay updated"<<endl;
+	//tableDisplay->activated(this->tableDisplay->currentIndex());
+	// after keyboardSearch the currentIndex index should be set
+	// scrollTo will provide the control over the posision of index
+	this->tableDisplay->scrollTo(
+			this->tableDisplay->currentIndex(),
+			QTableView::PositionAtCenter);
+	this->tableDisplay->selectRow(this->tableDisplay->selectionModel()->currentIndex().row());
+}
+
+void MainWindow::slot_SelectionChanged(const QItemSelection &, const QItemSelection &)
+    {
+      QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
+      for (int i = 0; i < indexes.count(); ++i)
+      {
+        // Output the rows of all of the selected indexes
+        cout << "selectedIndexes: " << indexes.at(i).row() << endl;
+      }
+    }
+

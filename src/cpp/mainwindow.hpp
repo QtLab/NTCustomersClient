@@ -33,9 +33,12 @@ class MainWindow : public QWidget {
 		void add_db();
 		void del_db();
 		void set_sort();
+		void slot_SelectionChanged(const QItemSelection &,
+			   						const QItemSelection &);
 
 	private:
 		void initUI();
+		void get_sorted(int column, Qt::SortOrder order);
 
 		enum { pushNum = 4,rowNum = 5, radioNum = 6, labelNum = 12};
 		enum button{upd=0, del=1, nu=2, clr=3};

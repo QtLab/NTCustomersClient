@@ -8,6 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 QT += sql
 
+
 # Input
 HEADERS += initdb.hpp mainwindow.hpp
 SOURCES += main.cpp mainwindow.cpp initdb.cpp
