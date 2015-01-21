@@ -91,7 +91,7 @@ void MainWindow::initUI()
 				   	const QItemSelection &)));
 
 	//connect showRow() with QLineEdits
-	connect(tableDisplay,SIGNAL(activated(QModelIndex)),this,SLOT(map_edits(QModelIndex)));
+	connect(tableDisplay,SIGNAL(clicked(QModelIndex)),this,SLOT(map_edits(QModelIndex)));
 
 	//display order and label
 	labels[0] = new QLabel(this);
@@ -329,6 +329,7 @@ void MainWindow::update_db()
 	cout << "\tconnection closed..." << endl;
 	
 	cout << "Update tableDisplay" <<endl;
+	cout << "\t>>CALLING SLOT:set_sort from update_db" << endl;
 	set_sort();	
 }
 
@@ -359,6 +360,7 @@ void MainWindow::add_db()
 	cout << "\tconnection closed..." << endl;
 
 	cout << "Update tableDisplay" <<endl;
+	cout << "\t>>CALLING SLOT:set_sort from add_db" << endl;
 	set_sort();
 }
 
@@ -387,6 +389,7 @@ void MainWindow::del_db()
 	northwind.close();
 	cout << "\tconnection closed..." << endl;
 	cout << "Update tableDisplay" <<endl;
+	cout << "\t>>CALLING SLOT:set_sort from del_db" << endl;
 	set_sort(); // updating the tableDisplay with new data from db
 }
 
@@ -409,6 +412,7 @@ void MainWindow::set_sort()
 
 void MainWindow::get_sorted(int column, Qt::SortOrder order)
 {
+	cout << "--------------------------------------------------------" << endl;
 	cout << "\t>>FUNC: get_sorted" << endl;
 	if (!this->northwind.open()){
 		QMessageBox::warning(0,"DB error","connection problem!");
@@ -435,22 +439,31 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 	//tableDisplay->activated(this->tableDisplay->currentIndex());
 	// after keyboardSearch the currentIndex index should be set
 	// scrollTo will provide the control over the posision of index
-	this->tableDisplay->scrollTo(
-			this->tableDisplay->currentIndex(),
-			QTableView::PositionAtCenter);
-	this->tableDisplay->selectRow(this->tableDisplay->selectionModel()->currentIndex().row());
+	//this->tableDisplay->scrollTo(
+			//this->tableDisplay->currentIndex(),
+			//QTableView::PositionAtCenter);
+	//this->tableDisplay->selectRow(this->tableDisplay->selectionModel()->currentIndex().row());
 }
 
 void MainWindow::slot_SelectionChanged(const QItemSelection &, const QItemSelection &)
 {
-      //QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
-      //for (int i = 0; i < indexes.count(); ++i)
-      //{
-        //// Output the rows of all of the selected indexes
-        //cout << "selectedIndexes: " << indexes.at(i).row() << endl;
-      //}
+	  QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
+	  for (int i = 0; i < indexes.count(); ++i)
+	  {
+		// Output the rows of all of the selected indexes
+		cout << "selectedIndexes: " << indexes.at(i).row() << endl;
+	  }
 	cout << "\t>>SLOT:slot_SelectionChanged"<<endl;	
-	tableDisplay->selectionModel()->select(
-					tableDisplay->selectionModel()->selection(), 
-					QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+	QModelIndex indx = tableDisplay->currentIndex();
+	QItemSelection slctn;
+	slctn.select(indx,indx);
+
+	tableDisplay->selectionModel()->select(slctn,
+			QItemSelectionModel::SelectCurrent |QItemSelectionModel::Rows);
+	tableDisplay->selectionModel()->setCurrentIndex(indx,
+			QItemSelectionModel::SelectCurrent |QItemSelectionModel::Rows);
+	//tableDisplay->selectRow(tableDisplay->selectionModel()->selection().indexes().at(0).row());
+	//tableDisplay->selectionModel()->select(
+					//tableDisplay->selectionModel()->selection(), 
+					//QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }

@@ -5,6 +5,7 @@
 -- Procedury składowane służące do modyfikowania bazy Northwind Traders.
 
 /* aktualizowanie danych w bazie */
+
 DROP PROCEDURE IF EXISTS northwind.`update_customers`;
 
 DELIMITER $$
@@ -23,19 +24,20 @@ CREATE PROCEDURE northwind.`update_customers`(
 	IN AtFax VARCHAR(24)
 )
 BEGIN
-UPDATE Customers
-SET CompanyName = AtCompanyName,
-	 ContactName = AtContactName,
-	 ContactTitle = AtContactTitle,
-	 Address = AtAdress,
-	 City = AtCity,
-	 Region = AtRegion,
-	 PostalCode = AtPostalCode, 
-	 Country = AtCountry,
-	 Phone = AtPhone,
-	 Fax = AtFax
-WHERE CustomerID = AtCustomerID;
-
+	IF (AtCompanyName IS NOT NULL AND AtCompanyName <> '') THEN
+		UPDATE Customers
+		SET CompanyName = AtCompanyName,
+			 ContactName = AtContactName,
+			 ContactTitle = AtContactTitle,
+			 Address = AtAdress,
+			 City = AtCity,
+			 Region = AtRegion,
+			 PostalCode = AtPostalCode, 
+			 Country = AtCountry,
+			 Phone = AtPhone,
+			 Fax = AtFax
+		WHERE CustomerID = AtCustomerID;
+	END IF;
 END$$
 
 DELIMITER ;
