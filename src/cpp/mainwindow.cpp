@@ -439,13 +439,14 @@ void MainWindow::get_sorted(int column, Qt::SortOrder order)
 	//tableDisplay->activated(this->tableDisplay->currentIndex());
 	// after keyboardSearch the currentIndex index should be set
 	// scrollTo will provide the control over the posision of index
-	//this->tableDisplay->scrollTo(
-			//this->tableDisplay->currentIndex(),
-			//QTableView::PositionAtCenter);
-	//this->tableDisplay->selectRow(this->tableDisplay->selectionModel()->currentIndex().row());
+	this->tableDisplay->scrollTo(
+			this->tableDisplay->currentIndex(),
+			QTableView::PositionAtCenter);
+	this->tableDisplay->selectRow(this->tableDisplay->selectionModel()->currentIndex().row());
 }
 
-void MainWindow::slot_SelectionChanged(const QItemSelection &, const QItemSelection &)
+void MainWindow::slot_SelectionChanged(const QItemSelection &,
+	   									const QItemSelection &)
 {
 	  QModelIndexList indexes = tableDisplay->selectionModel()->selection().indexes();
 	  for (int i = 0; i < indexes.count(); ++i)

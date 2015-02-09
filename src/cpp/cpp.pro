@@ -3,7 +3,8 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
+TARGET = NTClient
+DESTDIR = ../bin
 DEPENDPATH += .
 INCLUDEPATH += .
 QT += sql
